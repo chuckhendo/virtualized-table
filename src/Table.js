@@ -30,26 +30,12 @@ export default function Table({ content, onChange }) {
     gridRef.current.resetAfterColumnIndex(colIndex);
   }
 
-  const Cell = ({ columnIndex, rowIndex, style }) => {
-    const row = content[rowIndex];
-    return (
-      <Input
-        style={style}
-        value={row.data[columnIndex]}
-        data-col={columnIndex}
-        data-row-id={row.id}
-        onChange={updateContent}
-      />
-    );
-  };
-
   return (
     <AutoSizer>
       {({ height, width }) => (
         <Grid
           columnCount={content[0].data.length}
           columnWidth={index => {
-            console.log(index);
             return columnWidths[index];
           }}
           height={height}
@@ -57,6 +43,7 @@ export default function Table({ content, onChange }) {
           rowHeight={index => 30}
           width={width}
           ref={gridRef}
+          itemData={{ content, updateContent }}
         >
           {Cell}
         </Grid>
@@ -64,3 +51,17 @@ export default function Table({ content, onChange }) {
     </AutoSizer>
   );
 }
+
+const Cell = ({ columnIndex, rowIndex, style, data }) => {
+  const { content, updateContent } = data;
+  const row = content[rowIndex];
+  return (
+    <Input
+      style={style}
+      value={row.data[columnIndex]}
+      data-col={columnIndex}
+      data-row-id={row.id}
+      onChange={updateContent}
+    />
+  );
+};
