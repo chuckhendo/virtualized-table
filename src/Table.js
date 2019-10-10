@@ -7,6 +7,10 @@ import getStringWidth from './getStringWidth';
 const Input = styled.input`
   font-size: 16px;
   font-family: 'Helvetica Neue';
+
+  &::-ms-clear {
+    display: none;
+  }
 `;
 
 function getAllWidths(content) {
