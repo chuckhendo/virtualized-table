@@ -76,7 +76,7 @@ const Cell = memo(({ style, value, updateContent, columnIndex, rowId }) => {
   return (
     <Input
       style={style}
-      defaultValue={value}
+      value={value}
       data-col={columnIndex}
       data-row-id={rowId}
       onChange={updateContent}
