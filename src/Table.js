@@ -13,15 +13,24 @@ const Input = styled.input`
   }
 `;
 
-function getAllWidths(content) {
-  return content[0].data.map((_, colIndex) => {
-    const rowColumnWidths = content.map(row => {
-      return getStringWidth(row.data[colIndex]);
-    });
+function getAllWidthsInit() {
+  const cache = {};
+  return function getAllWidths(content) {
+    return content[0].data.map((_, colIndex) => {
+      const rowColumnWidths = content.map(row => {
+        const value = row.data[colIndex];
+        if (!cache[value]) {
+          cache[value] = getStringWidth(value);
+        }
+        return cache[value];
+      });
 
-    return Math.max(...rowColumnWidths);
-  });
+      return Math.max(...rowColumnWidths);
+    });
+  };
 }
+
+const getAllWidths = getAllWidthsInit();
 
 export default function Table({ content, onChange }) {
   const gridRef = useRef();
@@ -36,7 +45,6 @@ export default function Table({ content, onChange }) {
     },
     [onChange]
   );
-
   const columnWidths = getAllWidths(content);
 
   return (
