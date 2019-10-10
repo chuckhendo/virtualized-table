@@ -33,10 +33,10 @@ function App() {
 
   const sortedContent = [...content].sort((rowA, rowB) => {
     if (sortAsc) {
-      return rowA.data[0].localeCompare(rowB.data[0]);
+      return rowA.id.localeCompare(rowB.id);
     }
 
-    return rowB.data[0].localeCompare(rowA.data[0]);
+    return rowB.id.localeCompare(rowA.id);
   });
 
   function sort() {

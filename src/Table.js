@@ -75,8 +75,9 @@ const CellWrapper = ({ columnIndex, rowIndex, style, data }) => {
 const Cell = memo(({ style, value, updateContent, columnIndex, rowId }) => {
   return (
     <Input
+      key={rowId}
       style={style}
-      value={value}
+      defaultValue={value}
       data-col={columnIndex}
       data-row-id={rowId}
       onChange={updateContent}
