@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import generateContent from './generateContent';
 import './App.css';
@@ -10,6 +10,27 @@ function App() {
   const [content, setContent] = useState(initialContent);
   const [sortAsc, setSortAsc] = useState(true);
 
+  const updateContent = useCallback((value, rowId, colIndex) => {
+    setContent(content => {
+      const rowIndex = content.findIndex(row => row.id === rowId);
+      const newCols = content[rowIndex].data.map((col, index) => {
+        if (index === colIndex) {
+          return value;
+        }
+
+        return col;
+      });
+      const newRow = { ...content[rowIndex], data: newCols };
+      return content.map((row, index) => {
+        if (index === rowIndex) {
+          return newRow;
+        }
+
+        return row;
+      });
+    });
+  }, []);
+
   const sortedContent = [...content].sort((rowA, rowB) => {
     if (sortAsc) {
       return rowA.data[0].localeCompare(rowB.data[0]);
@@ -20,27 +41,6 @@ function App() {
 
   function sort() {
     setSortAsc(!sortAsc);
-  }
-
-  function updateContent(value, rowId, colIndex) {
-    const rowIndex = content.findIndex(row => row.id === rowId);
-    const newCols = content[rowIndex].data.map((col, index) => {
-      if (index === colIndex) {
-        return value;
-      }
-
-      return col;
-    });
-    const newRow = { ...content[rowIndex], data: newCols };
-    const newContent = content.map((row, index) => {
-      if (index === rowIndex) {
-        return newRow;
-      }
-
-      return row;
-    });
-
-    setContent(newContent);
   }
 
   return (

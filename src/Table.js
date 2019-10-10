@@ -1,6 +1,6 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useRef, memo, useCallback } from 'react';
 import styled from 'styled-components';
-import { VariableSizeGrid as Grid } from 'react-window';
+import { VariableSizeGrid as Grid, areEqual } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import getStringWidth from './getStringWidth';
 
@@ -9,26 +9,31 @@ const Input = styled.input`
   font-family: 'Helvetica Neue';
 `;
 
-export default function Table({ content, onChange }) {
-  const columnWidths = useMemo(() => {
-    return content[0].data.map((_, colIndex) => {
-      const rowColumnWidths = content.map(row => {
-        return getStringWidth(row.data[colIndex]);
-      });
-
-      return Math.max(...rowColumnWidths);
+function getAllWidths(content) {
+  return content[0].data.map((_, colIndex) => {
+    const rowColumnWidths = content.map(row => {
+      return getStringWidth(row.data[colIndex]);
     });
-  }, [content]);
 
+    return Math.max(...rowColumnWidths);
+  });
+}
+
+export default function Table({ content, onChange }) {
   const gridRef = useRef();
 
-  function updateContent(e) {
-    const { rowId, col: colIndexString } = e.target.dataset;
-    const colIndex = parseInt(colIndexString);
-    onChange(e.target.value, rowId, colIndex);
+  const updateContent = useCallback(
+    e => {
+      const { rowId, col: colIndexString } = e.target.dataset;
+      const colIndex = parseInt(colIndexString);
+      onChange(e.target.value, rowId, colIndex);
 
-    gridRef.current.resetAfterColumnIndex(colIndex);
-  }
+      gridRef.current.resetAfterColumnIndex(colIndex);
+    },
+    [onChange]
+  );
+
+  const columnWidths = getAllWidths(content);
 
   return (
     <AutoSizer>
@@ -45,23 +50,36 @@ export default function Table({ content, onChange }) {
           ref={gridRef}
           itemData={{ content, updateContent }}
         >
-          {Cell}
+          {CellWrapper}
         </Grid>
       )}
     </AutoSizer>
   );
 }
 
-const Cell = ({ columnIndex, rowIndex, style, data }) => {
+const CellWrapper = ({ columnIndex, rowIndex, style, data }) => {
   const { content, updateContent } = data;
   const row = content[rowIndex];
+  const value = row.data[columnIndex];
   return (
-    <Input
+    <Cell
       style={style}
-      value={row.data[columnIndex]}
-      data-col={columnIndex}
-      data-row-id={row.id}
-      onChange={updateContent}
+      value={value}
+      updateContent={updateContent}
+      columnIndex={columnIndex}
+      rowId={row.id}
     />
   );
 };
+
+const Cell = memo(({ style, value, updateContent, columnIndex, rowId }) => {
+  return (
+    <Input
+      style={style}
+      defaultValue={value}
+      data-col={columnIndex}
+      data-row-id={rowId}
+      onChange={updateContent}
+    />
+  );
+}, areEqual);
